@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-pdf-chatbot"
+version = "0.1.0"
+description = "Retrieval-augmented chatbot over your PDFs, with page-level citations."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Simantini Das" }]
+requires-python = ">=3.10"
+dependencies = ["pypdf>=4.0", "numpy>=1.26", "anthropic>=0.70", "python-dotenv>=1.0"]
+
+[project.optional-dependencies]
+ui = ["streamlit>=1.30"]
+dense = ["sentence-transformers>=3.0"]
+faiss = ["faiss-cpu>=1.8"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+ragbot = "rag_chatbot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

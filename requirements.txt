@@ -1,0 +1,17 @@
+# Core (required)
+pypdf>=4.0
+numpy>=1.26
+anthropic>=0.70
+python-dotenv>=1.0
+
+# UI
+streamlit>=1.30
+
+# Dev / tests
+pytest>=8.0
+
+# Optional extras - the app falls back gracefully without them:
+#   sentence-transformers  -> dense embeddings (falls back to built-in TF-IDF)
+#   faiss-cpu              -> FAISS index (falls back to a numpy cosine index)
+#   reportlab              -> only needed to regenerate the sample PDF
+# Install with:  pip install -r requirements-optional.txt

@@ -1,0 +1,32 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local vector indexes and caches
+.rag_index/
+index/
+*.faiss
+.cache/
+
+# Uploaded PDFs from the Streamlit app
+uploads/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
