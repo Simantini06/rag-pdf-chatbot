@@ -53,8 +53,22 @@ class Answer:
 _SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[A-Z0-9\"'(])")
 
 
-def split_sentences(text: str) -> list[str]:
-    return [s.strip() for s in _SENT_SPLIT.split(text) if s.strip()]
+def split_sentences(text: str, min_words: int = 4) -> list[str]:
+    """Split into sentences, gluing very short fragments (e.g. 'Warranty.' headings) onto the next one."""
+    out: list[str] = []
+    carry = ""
+    for s in (s.strip() for s in _SENT_SPLIT.split(text)):
+        if not s:
+            continue
+        s = f"{carry} {s}".strip() if carry else s
+        if len(s.split()) < min_words:
+            carry = s
+            continue
+        carry = ""
+        out.append(s)
+    if carry:
+        out.append(carry)
+    return out
 
 
 def extractive_answer(question: str, results: list[SearchResult], max_sentences: int = 3) -> Answer:
@@ -67,7 +81,7 @@ def extractive_answer(question: str, results: list[SearchResult], max_sentences:
         return Answer("I couldn't find anything relevant in the indexed documents.", [], "extractive")
 
     q_terms = set(tokenize(question))
-    scored: list[tuple[float, int, str]] = []
+    scored: list[tuple[float, int, int, str]] = []
     for rank, r in enumerate(results, start=1):
         for sent in split_sentences(r.chunk.text):
             s_terms = set(tokenize(sent))
@@ -75,12 +89,14 @@ def extractive_answer(question: str, results: list[SearchResult], max_sentences:
                 continue
             overlap = len(q_terms & s_terms)
             score = overlap / (len(q_terms) or 1) + 0.05 * (len(results) - rank) + 0.1 * r.score
-            scored.append((score, rank, sent))
+            scored.append((score, overlap, rank, sent))
 
     seen: set[str] = set()
     picked: list[tuple[int, str]] = []
-    for score, rank, sent in sorted(scored, key=lambda x: -x[0]):
+    for score, overlap, rank, sent in sorted(scored, key=lambda x: -x[0]):
         if sent in seen:  # overlapping chunks repeat sentences
+            continue
+        if overlap == 0 and picked:  # only pad with unrelated sentences if nothing matched at all
             continue
         seen.add(sent)
         picked.append((rank, sent))

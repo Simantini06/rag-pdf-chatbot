@@ -31,8 +31,17 @@ STOPWORDS = frozenset(
 )
 
 
+def _light_stem(token: str) -> str:
+    """Very small plural/3rd-person normaliser: batteries->battery, lasts->last, glass stays glass."""
+    if len(token) > 4 and token.endswith("ies"):
+        return token[:-3] + "y"
+    if len(token) > 3 and token.endswith("s") and not token.endswith(("ss", "us", "is")):
+        return token[:-1]
+    return token
+
+
 def tokenize(text: str) -> list[str]:
-    return [t for t in _TOKEN.findall(text.lower()) if t not in STOPWORDS]
+    return [_light_stem(t) for t in _TOKEN.findall(text.lower()) if t not in STOPWORDS]
 
 
 def _normalise(m: np.ndarray) -> np.ndarray:
